@@ -73,8 +73,13 @@ func main()  {
   // And you can get a deep path by:
   field := elem.Get("hello", "world", "deep", "3")
   _ = field.Value()
-  
   // Or set a deep path
+  // The different between Get and Ensure is that the Get
+  // just returns the exists field, if the path does not exist
+  // will return nil, and it will covert the path to integer
+  // if the node is an array, and the Ensure will force the
+  // path to be an object, and if the target path does not exist
+  // will auto generate it as a empty node.
   value.Ensure("hello", "world", "deep", "3").AsInt(3)
   
   // And you can dump a value to raw struct
