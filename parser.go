@@ -234,9 +234,9 @@ func Unmarshal(data []byte) (value *Value, err error) {
 								case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 									tempUnicode[tempInt3] = int(data[tempInt]) - 0x30
 								case 'a', 'b', 'c', 'd', 'e', 'f':
-									tempUnicode[tempInt3] = int(data[tempInt]) - 0x61
+									tempUnicode[tempInt3] = int(data[tempInt]) - 0x57
 								case 'A', 'B', 'C', 'D', 'E', 'F':
-									tempUnicode[tempInt3] = int(data[tempInt]) - 0x41
+									tempUnicode[tempInt3] = int(data[tempInt]) - 0x37
 								default:
 									err = unexpected("[0-F]", tempInt, size, data)
 									return
@@ -254,20 +254,20 @@ func Unmarshal(data []byte) (value *Value, err error) {
 						} else if (tempInt4 < 0x0800) {
 							buf, bufSize = addBuf(buf, tempInt2, bufSize, 2)
 							buf[tempInt2] = 0xC0 | byte(tempInt4 >> 6)
-							buf[tempInt2] = 0x80 | byte(tempInt4 & 0xBF)
+							buf[tempInt2+1] = 0x80 | byte(tempInt4 & 0xBF)
 							tempInt2 += 2
 						} else if (tempInt4 < 0x10000) {
 							buf, bufSize = addBuf(buf, tempInt2, bufSize, 3)
 							buf[tempInt2] = 0xE0 | byte(tempInt4 >> 12)
-							buf[tempInt2] = 0x80 | byte((tempInt4 >> 6) & 0xBF)
-							buf[tempInt2] = 0x80 | byte(tempInt4 & 0xBF)
+							buf[tempInt2+1] = 0x80 | byte((tempInt4 >> 6) & 0xBF)
+							buf[tempInt2+2] = 0x80 | byte(tempInt4 & 0xBF)
 							tempInt2 += 3
 						} else {
 							buf, bufSize = addBuf(buf, tempInt2, bufSize, 4)
 							buf[tempInt2] = 0xF0 | byte(tempInt4 >> 18)
-							buf[tempInt2] = 0x80 | byte((tempInt4 >> 12) & 0xBF)
-							buf[tempInt2] = 0x80 | byte((tempInt4 >> 6) & 0xBF)
-							buf[tempInt2] = 0x80 | byte(tempInt4 & 0xBF)
+							buf[tempInt2+1] = 0x80 | byte((tempInt4 >> 12) & 0xBF)
+							buf[tempInt2+2] = 0x80 | byte((tempInt4 >> 6) & 0xBF)
+							buf[tempInt2+3] = 0x80 | byte(tempInt4 & 0xBF)
 							tempInt2 += 4
 						}
 					case 't':

@@ -95,6 +95,9 @@ func TestUnmarshal(t *testing.T) {
 	value, err := cheapjson.Unmarshal(testInput)
 	assert.Nil(t, err, "should not throw error")
 	assert.Equal(t, testBlock, value.Value(), "strict same")
+	value, err = cheapjson.Unmarshal([]byte("\"\\ud83d\\ude02\\ud83d\\ude03\\u4e2d\\u56fd\\u4ebA\""))
+	assert.Nil(t, err)
+	assert.Equal(t, "😂😃中国人", value.String())
 }
 
 func TestSimpleJson(t *testing.T) {
