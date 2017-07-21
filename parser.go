@@ -254,20 +254,20 @@ func Unmarshal(data []byte) (value *Value, err error) {
 						} else if (tempInt4 < 0x0800) {
 							buf, bufSize = addBuf(buf, tempInt2, bufSize, 2)
 							buf[tempInt2] = 0xC0 | byte(tempInt4 >> 6)
-							buf[tempInt2+1] = 0x80 | byte(tempInt4 & 0xBF)
+							buf[tempInt2 + 1] = 0x80 | byte(tempInt4 & 0xBF)
 							tempInt2 += 2
 						} else if (tempInt4 < 0x10000) {
 							buf, bufSize = addBuf(buf, tempInt2, bufSize, 3)
 							buf[tempInt2] = 0xE0 | byte(tempInt4 >> 12)
-							buf[tempInt2+1] = 0x80 | byte((tempInt4 >> 6) & 0xBF)
-							buf[tempInt2+2] = 0x80 | byte(tempInt4 & 0xBF)
+							buf[tempInt2 + 1] = 0x80 | byte((tempInt4 >> 6) & 0xBF)
+							buf[tempInt2 + 2] = 0x80 | byte(tempInt4 & 0xBF)
 							tempInt2 += 3
 						} else {
 							buf, bufSize = addBuf(buf, tempInt2, bufSize, 4)
 							buf[tempInt2] = 0xF0 | byte(tempInt4 >> 18)
-							buf[tempInt2+1] = 0x80 | byte((tempInt4 >> 12) & 0xBF)
-							buf[tempInt2+2] = 0x80 | byte((tempInt4 >> 6) & 0xBF)
-							buf[tempInt2+3] = 0x80 | byte(tempInt4 & 0xBF)
+							buf[tempInt2 + 1] = 0x80 | byte((tempInt4 >> 12) & 0xBF)
+							buf[tempInt2 + 2] = 0x80 | byte((tempInt4 >> 6) & 0xBF)
+							buf[tempInt2 + 3] = 0x80 | byte(tempInt4 & 0xBF)
 							tempInt2 += 4
 						}
 					case 't':
