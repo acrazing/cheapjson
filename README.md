@@ -78,23 +78,17 @@ func main()  {
 
 ## Benchmark
 
-See <./parser_test.go>
-
-Compare with [go-simplejson](github.com/bitly/go-simplejson):
+See [parser_test.go](./parser_test.go), compare with [go-simplejson](https://github.com/bitly/go-simplejson), which
+use the native `encoding/json` library to unmarshal a json. The result is half of the time to cost!
 
 ```text
-$ go test -v -bench=. ./parser_test.go
+$ go test -v -bench=. ./parser_test.go -run NONE
 
-=== RUN   TestUnmarshal
---- PASS: TestUnmarshal (0.00s)
-=== RUN   TestSimpleJson
---- PASS: TestSimpleJson (0.00s)
-=== RUN   TestUnmarshal2
---- PASS: TestUnmarshal2 (0.00s)
-BenchmarkUnmarshal-4    	 2000000	       574 ns/op
-BenchmarkSimpleJson-4   	 2000000	       801 ns/op
+2017/07/22 00:25:39 big input size: 78122
+BenchmarkUnmarshal-4                3000            537921 ns/op
+BenchmarkSimpleJson-4               2000           1117259 ns/op
 PASS
-ok  	command-line-arguments	4.494s
+ok      command-line-arguments  4.047s
 ```
 
 ## License

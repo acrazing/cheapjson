@@ -8,6 +8,7 @@ import (
 	"."
 	"strings"
 	"github.com/bitly/go-simplejson"
+	"log"
 )
 
 type Block struct {
@@ -25,7 +26,7 @@ type Block struct {
 	Array     []interface{}
 }
 
-var block = &Block{
+var block = Block{
 	"string",
 	true,
 	false,
@@ -40,23 +41,25 @@ var block = &Block{
 	[]interface{}{"😍😘😢😓", "\r\t\f\n\b"},
 }
 
-var bigData = map[string]map[int]map[string]*Block{}
+var bigData = map[string]map[int]map[string]Block{}
+var bigInput []byte
 
 func init() {
-	for i := 0; i < 30; i++ {
-		temp := map[int]map[string]*Block{}
-		bigData[strings.Repeat("中文中文中文\r\n\t\f\b中文中😍😘😢😓文中文", i)] = temp
-		for j := 0; j < 30; j++ {
-			temp2 := map[string]*Block{}
-			temp[math.MaxInt64 - j] = temp2
-			for k := 0; k < 500; k++ {
-				temp2[strings.Repeat("中文中文\r\n\t\f\b中文中😍", i)] = block
+	for i := 0; i < 10; i++ {
+		key1 := strings.Repeat("中文中文中文\r\n\t\f\b中文中😍😘😢😓文中文", i)
+		bigData[key1] = map[int]map[string]Block{}
+		for j := 0; j < 10; j++ {
+			key2 := math.MaxInt64 - j
+			bigData[key1][key2] = map[string]Block{}
+			for k := 0; k < 10; k++ {
+				key3 := strings.Repeat("中文中文\r\n\t\f\b中文中😍", i)
+				bigData[key1][key2][key3] = block
 			}
 		}
 	}
+	bigInput, _ = json.MarshalIndent(bigData, "", "  ")
+	log.Printf("big input size: %d", len(bigInput))
 }
-
-var bigInput, _ = json.MarshalIndent(bigData, "", "  ")
 
 var testBlock = map[string]interface{}{
 	"string": "string",
@@ -100,19 +103,10 @@ func TestSimpleJson(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func TestUnmarshal2(t *testing.T) {
-	value, err := cheapjson.Unmarshal(bigInput)
-	assert.Nil(t, err)
-	output, err := json.MarshalIndent(value.Value(), "", "  ")
-	assert.Nil(t, err)
-	assert.Equal(t, bigInput, output)
-}
-
 func BenchmarkUnmarshal(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			value, err := cheapjson.Unmarshal(bigInput)
-			assert.Nil(b, err)
+			value, _ := cheapjson.Unmarshal(bigInput)
 			assert.NotNil(b, value)
 		}
 	})
