@@ -186,18 +186,17 @@ func (v *Value) Get(path... string) *Value {
 // requires all the values on the path is an object
 // if not, will force covert to an object
 func (v *Value) Ensure(path... string) *Value {
-	if !v.IsObject() {
-		v.AsObject(nil)
-	}
 	temp := v
 	var ok bool
 	var obj map[string]*Value
 	for _, field := range path {
+		if !temp.IsObject() {
+			temp.AsObject(nil)
+		}
 		if obj, ok = temp.value.(map[string]*Value); ok {
 			if temp, ok = obj[field]; !ok {
 				temp = NewValue()
 				obj[field] = temp
-				temp.AsObject(nil)
 			}
 		} else {
 			panic("any thing do not want")
