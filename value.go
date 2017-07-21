@@ -14,12 +14,20 @@ func NewValue() *Value {
 	return &Value{nil}
 }
 
-func (v *Value) AsObject() {
-	v.value = map[string]*Value{}
+func (v *Value) AsObject(value map[string]*Value) {
+	if value == nil {
+		v.value = map[string]*Value{}
+	} else {
+		v.value = value
+	}
 }
 
-func (v *Value) AsArray() {
-	v.value = []*Value{}
+func (v *Value) AsArray(value []*Value) {
+	if value == nil {
+		v.value = []*Value{}
+	} else {
+		v.value = value
+	}
 }
 
 func (v *Value) AsInt(value int64) {
@@ -132,30 +140,70 @@ func (v *Value) IsNull() bool {
 	}
 }
 
-// get child field, for object or array
-// if the value is not a object or array
-// will return nil
-func (v *Value) Get(fields... string) *Value {
+func (v *Value) IsString() bool {
+	switch v.value.(type) {
+	case string:
+		return true
+	default:
+		return false
+	}
+}
+
+// return the value of the specified path
+// if path not exist, will return nil
+// if some path is array, will covert the
+// path to integer, if covert error, will
+// return nil rather than panic.
+func (v *Value) Get(path... string) *Value {
 	value := v
 	index := 0
 	var obj map[string]*Value
 	var arr []*Value
 	var err error
 	var ok bool
-	for _, key := range fields {
+	for _, key := range path {
 		if obj, ok = value.value.(map[string]*Value); ok {
-			value = obj[key]
+			if value, ok = obj[key]; !ok {
+				return nil
+			}
 		} else if arr, ok = value.value.([]*Value); ok {
 			index, err = strconv.Atoi(key)
 			if err != nil {
-				panic(err)
+				return nil
+			}
+			if index < 0 || len(arr) < index + 1 {
+				return nil
 			}
 			value = arr[index]
 		} else {
-			panic("access a type is not object/array")
+			return nil
 		}
 	}
 	return value
+}
+
+// This will force add a path to a value
+// requires all the values on the path is an object
+// if not, will force covert to an object
+func (v *Value) Ensure(path... string) *Value {
+	if !v.IsObject() {
+		v.AsObject(nil)
+	}
+	temp := v
+	var ok bool
+	var obj map[string]*Value
+	for _, field := range path {
+		if obj, ok = temp.value.(map[string]*Value); ok {
+			if temp, ok = obj[field]; !ok {
+				temp = NewValue()
+				obj[field] = temp
+				temp.AsObject(nil)
+			}
+		} else {
+			panic("any thing do not want")
+		}
+	}
+	return temp
 }
 
 func (v *Value) Object() map[string]*Value {

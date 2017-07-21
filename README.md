@@ -57,6 +57,7 @@ func main()  {
   _ = value.IsFalse()
   _ = value.IsBool()
   _ = value.IsNull()
+  _ = value.IsString()
   
   // And you can manipulate a value
   value = cheapjson.NewValue()
@@ -68,6 +69,13 @@ func main()  {
   elem.AsFloat(232)
   elem.AsBool(true)
   elem.AsNull()
+  
+  // And you can get a deep path by:
+  field := elem.Get("hello", "world", "deep", "3")
+  _ = field.Value()
+  
+  // Or set a deep path
+  value.Ensure("hello", "world", "deep", "3").AsInt(3)
   
   // And you can dump a value to raw struct
   data := value.Value()
