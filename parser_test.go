@@ -10,44 +10,43 @@ import (
 	"github.com/bitly/go-simplejson"
 	"log"
 	"strconv"
+	"io/ioutil"
+	"os"
 )
 
-var normalData interface{} = map[string]interface{}{
-	"string": "string",
-	"true": true,
-	"false": false,
-	"null": nil,
-	"int": int64(math.MaxInt64),
-	"-int": -int64(math.MaxInt64),
-	"float": math.MaxFloat64,
-	"float2": math.SmallestNonzeroFloat64,
-	"-float": -math.MaxFloat64,
-	"-float2": -math.SmallestNonzeroFloat64,
-	"文\r\n\t\f\b中文中😍😘😢😓文":"中文中文中文\r\n\t\f\b中文中😍😘😢😓文中文",
-	"文\r\n\t\f\b中中😍😘😢😓文": []interface{}{
-		"string",
-		true,
-		false,
-		nil,
-		int64(math.MaxInt64),
-		-int64(math.MaxInt64),
-		math.MaxFloat64,
-		math.SmallestNonzeroFloat64,
-		-math.MaxFloat64,
-		-math.SmallestNonzeroFloat64,
-		"中文中文中文\r\n\t\f\b中文中😍😘😢😓文中文",
-		[]interface{}{"😍😘😢😓", "\r\t\f\n\b"},
-	},
-}
-
-var normalInput, _ = json.MarshalIndent(normalData, "", "  ")
-
-var bigData interface{} = map[string]interface{}{}
-var bigInput []byte
-var deepData interface{} = map[string]interface{}{}
-var deepInput []byte
-
-func init() {
+func initData() {
+	var normalData interface{} = map[string]interface{}{
+		"string": "string",
+		"true": true,
+		"false": false,
+		"null": nil,
+		"int": int64(math.MaxInt64),
+		"-int": -int64(math.MaxInt64),
+		"float": math.MaxFloat64,
+		"float2": math.SmallestNonzeroFloat64,
+		"-float": -math.MaxFloat64,
+		"-float2": -math.SmallestNonzeroFloat64,
+		"文\r\n\t\f\b中文中😍😘😢😓文":"中文中文中文\r\n\t\f\b中文中😍😘😢😓文中文",
+		"文\r\n\t\f\b中中😍😘😢😓文": []interface{}{
+			"string",
+			true,
+			false,
+			nil,
+			int64(math.MaxInt64),
+			-int64(math.MaxInt64),
+			math.MaxFloat64,
+			math.SmallestNonzeroFloat64,
+			-math.MaxFloat64,
+			-math.SmallestNonzeroFloat64,
+			"中文中文中文\r\n\t\f\b中文中😍😘😢😓文中文",
+			[]interface{}{"😍😘😢😓", "\r\t\f\n\b"},
+		},
+	}
+	var normalInput, _ = json.MarshalIndent(normalData, "", "  ")
+	var bigData interface{} = map[string]interface{}{}
+	var bigInput []byte
+	var deepData interface{} = map[string]interface{}{}
+	var deepInput []byte
 	tempData := bigData
 	size := 40
 	for i := 0; i < size; i++ {
@@ -70,21 +69,42 @@ func init() {
 	for i := 0; i < 1000; i++ {
 		if temp, ok := tempData.(map[string]interface{}); ok {
 			tempData = map[string]interface{}{}
-			temp[strings.Repeat("中文中文\r\n\t\f\b中文中😍😘😢😓文中文", i)] = tempData
+			temp["中文中文\r\n\t\f\b中文中😍😘😢😓文中文"] = tempData
 		}
+	}
+	if temp, ok := tempData.(map[string]interface{}); ok {
+		temp["1"] = normalData
 	}
 	bigInput, _ = json.MarshalIndent(bigData, "", "  ")
 	deepInput, _ = json.MarshalIndent(deepData, "", "  ")
+	ioutil.WriteFile("./data/normal.json", normalInput, 0777)
+	ioutil.WriteFile("./data/big.json", bigInput, 0777)
+	ioutil.WriteFile("./data/deep.json", deepInput, 0777)
+}
+
+var normalInput []byte
+var bigInput []byte
+var deepInput []byte
+
+func init() {
+	if _, err := os.Stat("./data/normal.json"); os.IsNotExist(err) {
+		initData()
+	}
+	normalInput, _ = ioutil.ReadFile("./data/normal.json")
+	bigInput, _ = ioutil.ReadFile("./data/big.json")
+	deepInput, _ = ioutil.ReadFile("./data/deep.json")
 	log.Printf("big input size: %d, normal input size: %d, deep input size: %d", len(bigInput), len(normalInput), len(deepInput))
 }
 
 func TestUnmarshal(t *testing.T) {
 	value, err := cheapjson.Unmarshal(normalInput)
 	assert.Nil(t, err)
-	assert.Equal(t, normalData, value.Value())
+	jsonOutput, err := json.MarshalIndent(value.Value(), "", "  ")
+	assert.Nil(t, err)
+	assert.Equal(t, normalInput, jsonOutput)
 	value, err = cheapjson.Unmarshal(bigInput)
 	assert.Nil(t, err)
-	jsonOutput, err := json.MarshalIndent(value.Value(), "", "  ")
+	jsonOutput, err = json.MarshalIndent(value.Value(), "", "  ")
 	assert.Nil(t, err)
 	assert.Equal(t, bigInput, jsonOutput)
 	value, err = cheapjson.Unmarshal(deepInput)
@@ -160,3 +180,20 @@ func BenchmarkSimpleJsonDeepInput(b *testing.B) {
 	})
 }
 
+const count = 1000
+
+func TestProfileUnmarshal(t *testing.T) {
+	for i := 0; i < count; i++ {
+		value, err := cheapjson.Unmarshal(deepInput)
+		assert.NotNil(t, value)
+		assert.Nil(t, err)
+	}
+}
+
+func TestProfileSimpleJson(t *testing.T) {
+	for i := 0; i < count; i++ {
+		value, err := simplejson.NewJson(deepInput)
+		assert.NotNil(t, value)
+		assert.Nil(t, err)
+	}
+}

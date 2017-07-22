@@ -244,6 +244,9 @@ func (v *Value) String() string {
 }
 
 func (v *Value) Value() interface{} {
+	if v == nil {
+		return nil
+	}
 	switch v.value.(type) {
 	case null, nil:
 		return nil

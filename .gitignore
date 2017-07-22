@@ -2,3 +2,12 @@
 node_modules/
 lib/
 *.swp
+*.prof
+*.test
+*.gif
+*.out
+data/
+*.pdf
+!prof_cpu.pdf
+!prof_mem.pdf
+!full_mem.pdf
