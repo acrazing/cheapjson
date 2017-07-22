@@ -9,9 +9,10 @@ import (
 	"strings"
 	"github.com/bitly/go-simplejson"
 	"log"
+	"strconv"
 )
 
-var normalBlock = map[string]interface{}{
+var normalData interface{} = map[string]interface{}{
 	"string": "string",
 	"true": true,
 	"false": false,
@@ -39,27 +40,33 @@ var normalBlock = map[string]interface{}{
 	},
 }
 
-var normalInput, _ = json.MarshalIndent(normalBlock, "", "  ")
+var normalInput, _ = json.MarshalIndent(normalData, "", "  ")
 
-var bigData = map[string]map[int]map[string]interface{}{}
+var bigData interface{} = map[string]interface{}{}
 var bigInput []byte
 var deepData interface{} = map[string]interface{}{}
 var deepInput []byte
 
 func init() {
-	for i := 0; i < 10; i++ {
-		key1 := strings.Repeat("中文中文中文\r\n\t\f\b中文中😍😘😢😓文中文", i)
-		bigData[key1] = map[int]map[string]interface{}{}
-		for j := 0; j < 30; j++ {
-			key2 := math.MaxInt64 - j
-			bigData[key1][key2] = map[string]interface{}{}
-			for k := 0; k < 100; k++ {
-				key3 := strings.Repeat("中文中文\r\n\t\f\b中文中😍", k)
-				bigData[key1][key2][key3] = normalBlock
+	tempData := bigData
+	size := 40
+	for i := 0; i < size; i++ {
+		if temp1, ok := tempData.(map[string]interface{}); ok {
+			key1 := strings.Repeat("中文中文中文\r\n\t\f\b中文中😍😘😢😓文中文", i + 1)
+			temp2 := map[string]map[string]interface{}{}
+			temp1[key1] = temp2
+			for j := 0; j < size; j++ {
+				key2 := strconv.Itoa(math.MaxInt64 - j)
+				temp3 := map[string]interface{}{}
+				temp2[key2] = temp3
+				for k := 0; k < size; k++ {
+					key3 := strings.Repeat("中文中文\r\n\t\f\b中文中😍", k + 1)
+					temp3[key3] = normalData
+				}
 			}
 		}
 	}
-	tempData := deepData
+	tempData = deepData
 	for i := 0; i < 1000; i++ {
 		if temp, ok := tempData.(map[string]interface{}); ok {
 			tempData = map[string]interface{}{}
@@ -73,8 +80,18 @@ func init() {
 
 func TestUnmarshal(t *testing.T) {
 	value, err := cheapjson.Unmarshal(normalInput)
-	assert.Nil(t, err, "should not throw error")
-	assert.Equal(t, normalBlock, value.Value(), "strict same")
+	assert.Nil(t, err)
+	assert.Equal(t, normalData, value.Value())
+	value, err = cheapjson.Unmarshal(bigInput)
+	assert.Nil(t, err)
+	jsonOutput, err := json.MarshalIndent(value.Value(), "", "  ")
+	assert.Nil(t, err)
+	assert.Equal(t, bigInput, jsonOutput)
+	value, err = cheapjson.Unmarshal(deepInput)
+	assert.Nil(t, err)
+	jsonOutput, err = json.MarshalIndent(value.Value(), "", "  ")
+	assert.Nil(t, err)
+	assert.Equal(t, deepInput, jsonOutput)
 	value, err = cheapjson.Unmarshal([]byte("\"\\ud83d\\ude02\\ud83d\\ude03\\u4e2d\\u56fd\\u4ebA\""))
 	assert.Nil(t, err)
 	assert.Equal(t, "😂😃中国人", value.String())
