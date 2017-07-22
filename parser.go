@@ -244,6 +244,10 @@ func Unmarshal(data []byte) (value *Value, err error) {
 								tempInt++
 							}
 							tempInt3 = (tempUnicode[0] << 12) | (tempUnicode[1] << 8) | (tempUnicode[2] << 4) | (tempUnicode[3])
+							if tempInt3 < 0xDC00 || tempInt3 > 0xDFFF {
+								err = unexpected("[0xdc00 - 0xdfff]", tempInt - 4, size, data)
+								return
+							}
 							tempInt4 = (((tempInt4 - 0xD800) << 10) | (tempInt3 - 0xDC00)) + 0x10000
 						}
 						tempInt--
