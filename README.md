@@ -4,7 +4,7 @@ A arbitrary JSON parser for golang.
 
 - **Standalone**: implement the parser independently for `ECMA-404 The JSON Data Interchange Standard`.
 - **Fast**: about two times faster than the package `go-simplejson` which use native `encoding/json` library.
-- **Lightweight**: only 500 rows about the parser.
+- **Lightweight**: only about 500 rows code for parser include UTF-16 pairs covert to UTF-8 bytes.
 
 ## Install
 
@@ -96,16 +96,29 @@ func main()  {
 ## Benchmark
 
 See [parser_test.go](./parser_test.go), compare with [go-simplejson](https://github.com/bitly/go-simplejson), which
-use the native `encoding/json` library to unmarshal a json. The result is half of the time to cost!
+use the native `encoding/json` library to unmarshal a json. The result is:
 
-```text
-$ go test -v -bench=. ./parser_test.go -run NONE
+- NormalInput(small): about 1.6 times faster
+- BigInput: about 4.4 times faster
+- DeepInput: about 7 times faster
 
-2017/07/22 00:25:39 big input size: 78122
-BenchmarkUnmarshal-4                3000            537921 ns/op
-BenchmarkSimpleJson-4               2000           1117259 ns/op
-PASS
-ok      command-line-arguments  4.047s
+```bash
+go test -bench=. -v ./parser_test.go
+
+# 2017/07/22 12:48:45 big input size: 92338772, normal input size: 763, deep input size: 33976002
+# === RUN   TestUnmarshal
+# --- PASS: TestUnmarshal (0.00s)
+# === RUN   TestSimpleJson
+# --- PASS: TestSimpleJson (1.62s)
+# BenchmarkUnmarshalBigInput-4                   5         358595392 ns/op
+# BenchmarkSimpleJsonBigInput-4                  1        1560047078 ns/op
+# BenchmarkUnmarshalNormalInput-4           200000              5372 ns/op
+# BenchmarkSimpleJsonNormalInput-4          200000              8593 ns/op
+# BenchmarkUnmarshalDeepInput-4                 30          42870590 ns/op
+# BenchmarkSimpleJsonDeepInput-4                 5         305351224 ns/op
+# PASS
+# ok      command-line-arguments  18.314s
+
 ```
 
 ## License
@@ -115,4 +128,5 @@ MIT
 
 ## TODO
 
-- [ ] more unit test
+- [x] more unit test.
+- [ ] test the performance about make buffer before handle a string, (will walk the string twice).
