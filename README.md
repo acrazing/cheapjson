@@ -1,6 +1,10 @@
-# Cheap JSON
+# [Cheap JSON](https://godoc.org/github.com/acrazing/cheapjson) &middot; [![GoDoc](https://godoc.org/github.com/acrazing/cheapjson?status.svg)](https://godoc.org/github.com/acrazing/cheapjson)
 
-A fast, lightweight, struct-less JSON parser for golang.
+A arbitrary JSON parser for golang.
+
+- **Standalone**: implement the parser independently for `ECMA-404 The JSON Data Interchange Standard`.
+- **Fast**: about two times faster than the package `go-simplejson` which use native `encoding/json` library.
+- **Lightweight**: only 500 rows about the parser.
 
 ## Install
 
@@ -8,7 +12,7 @@ A fast, lightweight, struct-less JSON parser for golang.
 go get github.com/acrazing/cheapjson
 ```
 
-## Usage
+## Usage Example
 
 ```go
 package main
@@ -61,9 +65,9 @@ func main()  {
   
   // And you can manipulate a value
   value = cheapjson.NewValue()
-  value.AsObject() // set as a object
+  value.AsObject(nil) // set as a object
   _ = value.AddField("hello") // if a value is a object, you can call this, else will panic
-  value.AsArray() // set as a array
+  value.AsArray(nil) // set as a array
   elem := value.AddElement() // if a value is a array, yu can call this, else will panic
   elem.AsInt(12) // as a int
   elem.AsFloat(232)
