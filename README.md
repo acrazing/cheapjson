@@ -1,4 +1,4 @@
-# [Cheap JSON](https://godoc.org/github.com/acrazing/cheapjson) &middot; [![GoDoc](https://godoc.org/github.com/acrazing/cheapjson?status.svg)](https://godoc.org/github.com/acrazing/cheapjson)
+# [Cheap JSON](https://godoc.org/github.com/acrazing/cheapjson) &middot; [![GoDoc](https://godoc.org/github.com/acrazing/cheapjson?status.svg)](https://godoc.org/github.com/acrazing/cheapjson) [![Build Status](https://travis-ci.org/acrazing/cheapjson.svg?branch=master)](https://travis-ci.org/acrazing/cheapjson)
 
 A arbitrary JSON parser for golang.
 

@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"io/ioutil"
 	"os"
+	"flag"
 )
 
 func initData() {
@@ -77,6 +78,7 @@ func initData() {
 	}
 	bigInput, _ = json.MarshalIndent(bigData, "", "  ")
 	deepInput, _ = json.MarshalIndent(deepData, "", "  ")
+	os.MkdirAll("./data", 0777)
 	ioutil.WriteFile("./data/normal.json", normalInput, 0777)
 	ioutil.WriteFile("./data/big.json", bigInput, 0777)
 	ioutil.WriteFile("./data/deep.json", deepInput, 0777)
@@ -85,8 +87,11 @@ func initData() {
 var normalInput []byte
 var bigInput []byte
 var deepInput []byte
+var profileCount int
 
 func init() {
+	flag.IntVar(&profileCount, "run-profile", 0, "specify run profile test")
+	flag.Parse()
 	if _, err := os.Stat("./data/normal.json"); os.IsNotExist(err) {
 		initData()
 	}
@@ -115,12 +120,6 @@ func TestUnmarshal(t *testing.T) {
 	value, err = cheapjson.Unmarshal([]byte("\"\\ud83d\\ude02\\ud83d\\ude03\\u4e2d\\u56fd\\u4ebA\""))
 	assert.Nil(t, err)
 	assert.Equal(t, "😂😃中国人", value.String())
-}
-
-func TestSimpleJson(t *testing.T) {
-	value := simplejson.New()
-	err := value.UnmarshalJSON(bigInput)
-	assert.Nil(t, err)
 }
 
 func BenchmarkUnmarshalBigInput(b *testing.B) {
@@ -180,10 +179,8 @@ func BenchmarkSimpleJsonDeepInput(b *testing.B) {
 	})
 }
 
-const count = 1000
-
 func TestProfileUnmarshal(t *testing.T) {
-	for i := 0; i < count; i++ {
+	for i := 0; i < profileCount; i++ {
 		value, err := cheapjson.Unmarshal(deepInput)
 		assert.NotNil(t, value)
 		assert.Nil(t, err)
@@ -191,7 +188,7 @@ func TestProfileUnmarshal(t *testing.T) {
 }
 
 func TestProfileSimpleJson(t *testing.T) {
-	for i := 0; i < count; i++ {
+	for i := 0; i < profileCount; i++ {
 		value, err := simplejson.NewJson(deepInput)
 		assert.NotNil(t, value)
 		assert.Nil(t, err)
