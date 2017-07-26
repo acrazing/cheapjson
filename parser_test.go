@@ -13,6 +13,7 @@ import (
 	"io/ioutil"
 	"os"
 	"flag"
+	"github.com/a8m/djson"
 )
 
 func initData() {
@@ -181,7 +182,7 @@ func BenchmarkSimpleJsonDeepInput(b *testing.B) {
 
 func TestProfileUnmarshal(t *testing.T) {
 	for i := 0; i < profileCount; i++ {
-		value, err := cheapjson.Unmarshal(deepInput)
+		value, err := cheapjson.Unmarshal(bigInput)
 		assert.NotNil(t, value)
 		assert.Nil(t, err)
 	}
@@ -189,8 +190,16 @@ func TestProfileUnmarshal(t *testing.T) {
 
 func TestProfileSimpleJson(t *testing.T) {
 	for i := 0; i < profileCount; i++ {
-		value, err := simplejson.NewJson(deepInput)
+		value, err := simplejson.NewJson(bigInput)
 		assert.NotNil(t, value)
 		assert.Nil(t, err)
+	}
+}
+
+func TestProfileDjson(t *testing.T) {
+	for i := 0; i < profileCount; i++ {
+		value, err := djson.Decode(bigInput)
+		assert.Nil(t, err)
+		assert.NotNil(t, value)
 	}
 }
