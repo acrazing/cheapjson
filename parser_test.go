@@ -14,6 +14,7 @@ import (
 	"os"
 	"flag"
 	"github.com/a8m/djson"
+	"github.com/acrazing/json-test-suite"
 )
 
 func initData() {
@@ -202,4 +203,18 @@ func TestProfileDjson(t *testing.T) {
 		assert.Nil(t, err)
 		assert.NotNil(t, value)
 	}
+}
+
+func BenchmarkCompareMarshal(b *testing.B) {
+	json_test_suite.CompareUnmarshal(map[string]func(data []byte) (interface{}, error){
+		"cheapjson": func(data []byte) (interface{}, error) {
+			return cheapjson.Unmarshal(data)
+		},
+		"djson": func(data []byte) (interface{}, error) {
+			return djson.Decode(data)
+		},
+		"go-simplejson": func(data []byte) (interface{}, error) {
+			return simplejson.NewJson(data)
+		},
+	}, "./json-test-suite/correct")
 }
