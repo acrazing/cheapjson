@@ -1,0 +1,3 @@
+[submodule "json-test-suite"]
+	path = json-test-suite
+	url = git@github.com:acrazing/json-test-suite
