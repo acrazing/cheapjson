@@ -154,7 +154,7 @@ func (v *Value) IsString() bool {
 // if some path is array, will covert the
 // path to integer, if covert error, will
 // return nil rather than panic.
-func (v *Value) Get(path... string) *Value {
+func (v *Value) Get(path ...string) *Value {
 	value := v
 	index := 0
 	var obj map[string]*Value
@@ -171,7 +171,7 @@ func (v *Value) Get(path... string) *Value {
 			if err != nil {
 				return nil
 			}
-			if index < 0 || len(arr) < index + 1 {
+			if index < 0 || len(arr) < index+1 {
 				return nil
 			}
 			value = arr[index]
@@ -185,7 +185,7 @@ func (v *Value) Get(path... string) *Value {
 // This will force add a path to a value
 // requires all the values on the path is an object
 // if not, will force covert to an object
-func (v *Value) Ensure(path... string) *Value {
+func (v *Value) Ensure(path ...string) *Value {
 	temp := v
 	var ok bool
 	var obj map[string]*Value

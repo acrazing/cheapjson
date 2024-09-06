@@ -1,9 +1,9 @@
 package cheapjson
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
-	"bytes"
 	"strconv"
 )
 
@@ -17,9 +17,9 @@ func unexpected(expect string, offset, size int, data []byte) error {
 
 var (
 	valueStart = "{, [, [0-9], -, t, f, n, \""
-	bytesTrue = []byte{'r', 'u', 'e'}
+	bytesTrue  = []byte{'r', 'u', 'e'}
 	bytesFalse = []byte{'a', 'l', 's', 'e'}
-	bytesNull = []byte{'u', 'l', 'l'}
+	bytesNull  = []byte{'u', 'l', 'l'}
 )
 
 const (
@@ -48,7 +48,7 @@ type state struct {
 }
 
 func addBuf(buf []byte, tempInt2, bufSize, ask int) ([]byte, int) {
-	if bufSize < tempInt2 + ask {
+	if bufSize < tempInt2+ask {
 		bufSize += 1024
 		nbuf := make([]byte, bufSize)
 		copy(nbuf, buf)
@@ -75,7 +75,7 @@ func Unmarshal(data []byte) (value *Value, err error) {
 	var tempExp []byte
 	for {
 		// any loop start should check the whitespace
-		LOOP_WHITESPACE:
+	LOOP_WHITESPACE:
 		for ; offset < size; offset++ {
 			switch data[offset] {
 			case '\t', '\r', '\n', ' ':
@@ -174,7 +174,7 @@ func Unmarshal(data []byte) (value *Value, err error) {
 		case stateString:
 			offset++
 			tempInt2 = 0
-			LOOP_STRING:
+		LOOP_STRING:
 			for tempInt = offset; tempInt < size; tempInt++ {
 				switch data[tempInt] {
 				case '\\':
@@ -186,7 +186,7 @@ func Unmarshal(data []byte) (value *Value, err error) {
 					switch data[tempInt] {
 					case 'U', 'u':
 						tempInt++
-						if size < tempInt + 4 {
+						if size < tempInt+4 {
 							err = unexpected("[0-F]", size, size, data)
 							return
 						}
@@ -207,13 +207,13 @@ func Unmarshal(data []byte) (value *Value, err error) {
 						tempInt4 = (tempUnicode[0] << 12) | (tempUnicode[1] << 8) | (tempUnicode[2] << 4) | (tempUnicode[3])
 						if tempInt4 > 0xD7FF && tempInt4 < 0xDC00 {
 							// need next utf-16 part
-							if size < tempInt + 6 {
+							if size < tempInt+6 {
 								if size == tempInt || data[tempInt] != '\\' {
 									err = unexpected("\\", size, size, data)
 									return
 								}
-								if size < tempInt + 2 || (data[tempInt + 1] != 'U' && data[tempInt + 1] != 'u') {
-									err = unexpected("Uu", tempInt + 1, size, data)
+								if size < tempInt+2 || (data[tempInt+1] != 'U' && data[tempInt+1] != 'u') {
+									err = unexpected("Uu", tempInt+1, size, data)
 									return
 								}
 								err = unexpected("[0-F]", size, size, data)
@@ -245,7 +245,7 @@ func Unmarshal(data []byte) (value *Value, err error) {
 							}
 							tempInt3 = (tempUnicode[0] << 12) | (tempUnicode[1] << 8) | (tempUnicode[2] << 4) | (tempUnicode[3])
 							if tempInt3 < 0xDC00 || tempInt3 > 0xDFFF {
-								err = unexpected("[0xdc00 - 0xdfff]", tempInt - 4, size, data)
+								err = unexpected("[0xdc00 - 0xdfff]", tempInt-4, size, data)
 								return
 							}
 							tempInt4 = (((tempInt4 - 0xD800) << 10) | (tempInt3 - 0xDC00)) + 0x10000
@@ -255,23 +255,23 @@ func Unmarshal(data []byte) (value *Value, err error) {
 							buf, bufSize = addBuf(buf, tempInt2, bufSize, 1)
 							buf[tempInt2] = byte(tempInt4)
 							tempInt2++
-						} else if (tempInt4 < 0x0800) {
+						} else if tempInt4 < 0x0800 {
 							buf, bufSize = addBuf(buf, tempInt2, bufSize, 2)
-							buf[tempInt2] = 0xC0 | byte(tempInt4 >> 6)
-							buf[tempInt2 + 1] = 0x80 | byte(tempInt4 & 0xBF)
+							buf[tempInt2] = 0xC0 | byte(tempInt4>>6)
+							buf[tempInt2+1] = 0x80 | byte(tempInt4&0xBF)
 							tempInt2 += 2
-						} else if (tempInt4 < 0x10000) {
+						} else if tempInt4 < 0x10000 {
 							buf, bufSize = addBuf(buf, tempInt2, bufSize, 3)
-							buf[tempInt2] = 0xE0 | byte(tempInt4 >> 12)
-							buf[tempInt2 + 1] = 0x80 | byte((tempInt4 >> 6) & 0xBF)
-							buf[tempInt2 + 2] = 0x80 | byte(tempInt4 & 0xBF)
+							buf[tempInt2] = 0xE0 | byte(tempInt4>>12)
+							buf[tempInt2+1] = 0x80 | byte((tempInt4>>6)&0xBF)
+							buf[tempInt2+2] = 0x80 | byte(tempInt4&0xBF)
 							tempInt2 += 3
 						} else {
 							buf, bufSize = addBuf(buf, tempInt2, bufSize, 4)
-							buf[tempInt2] = 0xF0 | byte(tempInt4 >> 18)
-							buf[tempInt2 + 1] = 0x80 | byte((tempInt4 >> 12) & 0xBF)
-							buf[tempInt2 + 2] = 0x80 | byte((tempInt4 >> 6) & 0xBF)
-							buf[tempInt2 + 3] = 0x80 | byte(tempInt4 & 0xBF)
+							buf[tempInt2] = 0xF0 | byte(tempInt4>>18)
+							buf[tempInt2+1] = 0x80 | byte((tempInt4>>12)&0xBF)
+							buf[tempInt2+2] = 0x80 | byte((tempInt4>>6)&0xBF)
+							buf[tempInt2+3] = 0x80 | byte(tempInt4&0xBF)
 							tempInt2 += 4
 						}
 					case 't':
@@ -365,7 +365,7 @@ func Unmarshal(data []byte) (value *Value, err error) {
 				if data[offset] == '-' {
 					offset++
 				}
-				LOOP_NUM_INT: // read number.integer part
+			LOOP_NUM_INT: // read number.integer part
 				for tempInt = offset; tempInt < size; tempInt++ {
 					switch data[tempInt] {
 					case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
@@ -393,7 +393,7 @@ func Unmarshal(data []byte) (value *Value, err error) {
 				if offset < size && data[offset] == '.' {
 					// has decimal
 					offset++
-					LOOP_NUM_DEC:
+				LOOP_NUM_DEC:
 					for tempInt = offset; tempInt < size; tempInt++ {
 						switch data[tempInt] {
 						case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
@@ -422,7 +422,7 @@ func Unmarshal(data []byte) (value *Value, err error) {
 						offset++
 					}
 
-					LOOP_NUM_EXP:
+				LOOP_NUM_EXP:
 					for tempInt = offset; tempInt < size; tempInt++ {
 						switch data[tempInt] {
 						case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
@@ -454,12 +454,12 @@ func Unmarshal(data []byte) (value *Value, err error) {
 				continue
 			case 'n':
 				offset++
-				if size < offset + 3 {
-					expect := bytesNull[size - offset]
+				if size < offset+3 {
+					expect := bytesNull[size-offset]
 					err = unexpected(string(expect), size, size, data)
 					return
 				}
-				if bytes.Equal(data[offset:offset + 3], bytesNull) {
+				if bytes.Equal(data[offset:offset+3], bytesNull) {
 					offset += 3
 					curr.value.value = NULL
 					curr = curr.parent
@@ -469,12 +469,12 @@ func Unmarshal(data []byte) (value *Value, err error) {
 				return
 			case 't':
 				offset++
-				if size < offset + 3 {
-					tempByte = bytesTrue[size - offset]
+				if size < offset+3 {
+					tempByte = bytesTrue[size-offset]
 					err = unexpected(string(tempByte), size, size, data)
 					return
 				}
-				if bytes.Equal(data[offset:offset + 3], bytesTrue) {
+				if bytes.Equal(data[offset:offset+3], bytesTrue) {
 					offset += 3
 					curr.value.value = true
 					curr = curr.parent
@@ -484,12 +484,12 @@ func Unmarshal(data []byte) (value *Value, err error) {
 				return
 			case 'f':
 				offset++
-				if size < offset + 4 {
-					tempByte = bytesFalse[size - offset]
+				if size < offset+4 {
+					tempByte = bytesFalse[size-offset]
 					err = unexpected(string(tempByte), size, size, data)
 					return
 				}
-				if bytes.Equal(data[offset:offset + 4], bytesFalse) {
+				if bytes.Equal(data[offset:offset+4], bytesFalse) {
 					offset += 4
 					curr.value.value = false
 					curr = curr.parent

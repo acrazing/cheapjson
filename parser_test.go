@@ -2,34 +2,33 @@ package cheapjson_test
 
 import (
 	"encoding/json"
-	"testing"
-	"math"
-	"github.com/stretchr/testify/assert"
-	"."
-	"strings"
-	"github.com/bitly/go-simplejson"
 	"log"
-	"strconv"
-	"io/ioutil"
+	"math"
 	"os"
-	"flag"
+	"strconv"
+	"strings"
+	"testing"
+
 	"github.com/a8m/djson"
-	"github.com/acrazing/json-test-suite"
+	"github.com/acrazing/cheapjson"
+	json_test_suite "github.com/acrazing/json-test-suite"
+	"github.com/bitly/go-simplejson"
+	"github.com/stretchr/testify/assert"
 )
 
 func initData() {
 	var normalData interface{} = map[string]interface{}{
-		"string": "string",
-		"true": true,
-		"false": false,
-		"null": nil,
-		"int": int64(math.MaxInt64),
-		"-int": -int64(math.MaxInt64),
-		"float": math.MaxFloat64,
-		"float2": math.SmallestNonzeroFloat64,
-		"-float": -math.MaxFloat64,
+		"string":  "string",
+		"true":    true,
+		"false":   false,
+		"null":    nil,
+		"int":     int64(math.MaxInt64),
+		"-int":    -int64(math.MaxInt64),
+		"float":   math.MaxFloat64,
+		"float2":  math.SmallestNonzeroFloat64,
+		"-float":  -math.MaxFloat64,
 		"-float2": -math.SmallestNonzeroFloat64,
-		"文\r\n\t\f\b中文中😍😘😢😓文":"中文中文中文\r\n\t\f\b中文中😍😘😢😓文中文",
+		"文\r\n\t\f\b中文中😍😘😢😓文": "中文中文中文\r\n\t\f\b中文中😍😘😢😓文中文",
 		"文\r\n\t\f\b中中😍😘😢😓文": []interface{}{
 			"string",
 			true,
@@ -54,7 +53,7 @@ func initData() {
 	size := 40
 	for i := 0; i < size; i++ {
 		if temp1, ok := tempData.(map[string]interface{}); ok {
-			key1 := strings.Repeat("中文中文中文\r\n\t\f\b中文中😍😘😢😓文中文", i + 1)
+			key1 := strings.Repeat("中文中文中文\r\n\t\f\b中文中😍😘😢😓文中文", i+1)
 			temp2 := map[string]map[string]interface{}{}
 			temp1[key1] = temp2
 			for j := 0; j < size; j++ {
@@ -62,7 +61,7 @@ func initData() {
 				temp3 := map[string]interface{}{}
 				temp2[key2] = temp3
 				for k := 0; k < size; k++ {
-					key3 := strings.Repeat("中文中文\r\n\t\f\b中文中😍", k + 1)
+					key3 := strings.Repeat("中文中文\r\n\t\f\b中文中😍", k+1)
 					temp3[key3] = normalData
 				}
 			}
@@ -80,10 +79,10 @@ func initData() {
 	}
 	bigInput, _ = json.MarshalIndent(bigData, "", "  ")
 	deepInput, _ = json.MarshalIndent(deepData, "", "  ")
-	os.MkdirAll("./data", 0777)
-	ioutil.WriteFile("./data/normal.json", normalInput, 0777)
-	ioutil.WriteFile("./data/big.json", bigInput, 0777)
-	ioutil.WriteFile("./data/deep.json", deepInput, 0777)
+	_ = os.MkdirAll("./data", 0777)
+	_ = os.WriteFile("./data/normal.json", normalInput, 0777)
+	_ = os.WriteFile("./data/big.json", bigInput, 0777)
+	_ = os.WriteFile("./data/deep.json", deepInput, 0777)
 }
 
 var normalInput []byte
@@ -92,14 +91,12 @@ var deepInput []byte
 var profileCount int
 
 func init() {
-	flag.IntVar(&profileCount, "run-profile", 0, "specify run profile test")
-	flag.Parse()
 	if _, err := os.Stat("./data/normal.json"); os.IsNotExist(err) {
 		initData()
 	}
-	normalInput, _ = ioutil.ReadFile("./data/normal.json")
-	bigInput, _ = ioutil.ReadFile("./data/big.json")
-	deepInput, _ = ioutil.ReadFile("./data/deep.json")
+	normalInput, _ = os.ReadFile("./data/normal.json")
+	bigInput, _ = os.ReadFile("./data/big.json")
+	deepInput, _ = os.ReadFile("./data/deep.json")
 	log.Printf("big input size: %d, normal input size: %d, deep input size: %d", len(bigInput), len(normalInput), len(deepInput))
 }
 
