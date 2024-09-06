@@ -6,9 +6,9 @@ type Value struct {
 	value interface{}
 }
 
-type null int
+type null struct{}
 
-var NULL = null(0)
+var NULL = null{}
 
 func NewValue() *Value {
 	return &Value{nil}
